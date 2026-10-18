@@ -1,0 +1,973 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1e1433">
+<title>Titiritero</title>
+<link rel="icon" href="/icono.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<style>
+:root {
+  --noche: #1e1433; --terciopelo: #2e2150; --telon: #3b2a6b; --hilo: #f1e6cf; --hilo-suave: #c9bfd9;
+  --madera: #e9a23b; --pantalla: #33d6c4; --alerta: #e5484d; --mando: #f4f1ea; --mando-sombra: #cfc9bd;
+  --gris-boton: #4a4458;
+  --fuente: ui-rounded, "SF Pro Rounded", "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+* { box-sizing: border-box; }
+html { background: var(--noche); color-scheme: dark; -webkit-text-size-adjust: 100%; }
+body { margin: 0; min-height: 100vh; color: var(--hilo); font: 17px/1.5 var(--fuente);
+  background: radial-gradient(120% 70% at 30% 0%, #2c1d4f 0%, var(--noche) 60%); }
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--madera); outline-offset: 3px; }
+[hidden] { display: none !important; }
+.oculto { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+h1, h2, h3 { font-weight: 800; letter-spacing: -0.01em; }
+
+.cabecera { display: flex; align-items: center; gap: .8rem; padding: 1rem clamp(1rem, 3vw, 2.5rem) 0; }
+.cabecera img { width: 44px; height: 44px; }
+.cabecera h1 { font-size: 1.75rem; line-height: 1; margin: 0; }
+.estado { margin-left: auto; min-width: 0; display: flex; align-items: center; gap: .6rem; color: var(--hilo-suave); font-size: .95rem; }
+#estado-texto { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.luz { width: 12px; height: 12px; border-radius: 50%; background: var(--hilo-suave); flex: none; }
+.estado[data-vivo="si"] .luz { background: var(--pantalla); box-shadow: 0 0 0 4px rgba(51, 214, 196, .18); }
+.estado[data-vivo="no"] .luz { background: var(--alerta); }
+.peligro { margin: 1rem clamp(1rem, 3vw, 2.5rem) 0; padding: .8rem 1rem; border-radius: 14px; background: #4a1420; color: #ffd9da; border: 1px solid var(--alerta); max-width: 72ch; }
+
+/* ---------- emparejar ---------- */
+.emparejar { max-width: 34rem; margin: 2rem auto; padding: 0 1.25rem 3rem; }
+.emparejar h2 { font-size: 1.9rem; line-height: 1.15; margin: .5rem 0 1rem; }
+.emparejar ol { padding-left: 1.3rem; margin: 0 0 1.5rem; }
+.emparejar li { margin: .5rem 0; color: var(--hilo-suave); }
+.emparejar li strong { color: var(--hilo); }
+.tarjeta { background: var(--terciopelo); border-radius: 22px; padding: 1.25rem; }
+.campo { display: grid; gap: .35rem; margin-bottom: 1rem; }
+.campo span { color: var(--hilo-suave); font-size: .95rem; }
+.campo input { width: 100%; min-width: 0; padding: .7rem .9rem; border-radius: 12px; border: 1px solid var(--telon); background: var(--noche); }
+.codigo { font-size: clamp(1.5rem, 8vw, 2rem); letter-spacing: .25em; text-align: center; font-variant-numeric: tabular-nums; }
+.mensaje-emp { min-height: 1.5em; margin: .75rem 0 0; color: var(--hilo-suave); }
+.mensaje-emp.mal { color: #ffb3b5; }
+
+/* ---------- escenario ---------- */
+.escenario { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(320px, 1fr); gap: clamp(1rem, 2.5vw, 2rem);
+  padding: 0 clamp(1rem, 3vw, 2.5rem) 2rem; align-items: start; }
+@media (max-width: 980px) { .escenario { grid-template-columns: minmax(0, 1fr); } }
+.teatro { position: relative; padding-top: 70px; }
+.hilos { position: absolute; left: 0; top: 0; width: 100%; height: 92px; pointer-events: none; }
+
+.mando { --ancho-lado: clamp(92px, 15%, 150px); position: relative;
+  background: linear-gradient(180deg, #fffdf8 0%, var(--mando) 45%, var(--mando-sombra) 100%);
+  border-radius: 64px / 70px; padding: 26px 22px 20px; color: #2b2638;
+  box-shadow: 0 1px 0 #fff inset, 0 -3px 0 rgba(0,0,0,.08) inset, 0 30px 60px -20px rgba(0,0,0,.6); }
+.hombros { position: absolute; inset: -14px 40px auto; display: flex; justify-content: space-between; pointer-events: none; }
+.hombros > div { display: flex; gap: 8px; pointer-events: auto; }
+.gatillo { border: 0; border-radius: 12px 12px 6px 6px; padding: 4px 16px 6px; min-width: 58px; background: #e7e2d8; color: #3b3548; font-weight: 700; box-shadow: 0 2px 0 #b9b2a5; }
+.gatillo.z { background: #d6d0c4; }
+.cara { display: grid; grid-template-columns: var(--ancho-lado) minmax(0, 1fr) var(--ancho-lado); align-items: center; gap: 18px; }
+.lado { display: grid; justify-items: center; gap: 22px; }
+.marco { background: #17121f; border-radius: 16px; padding: 12px; box-shadow: 0 0 0 3px #cfc9bd; }
+.pantalla { position: relative; aspect-ratio: 854 / 480; background: #0d0a13; border-radius: 6px; overflow: hidden; touch-action: none; cursor: crosshair; }
+.pantalla img { width: 100%; height: 100%; display: block; object-fit: contain; user-select: none; -webkit-user-drag: none; }
+.velo { color: var(--hilo); position: absolute; inset: 0; display: grid; place-content: center; gap: .5rem; padding: 1.5rem; text-align: center; background: rgba(13, 10, 19, .82); }
+.velo strong { font-size: 1.25rem; }
+.toque { position: absolute; width: 34px; height: 34px; margin: -17px; border-radius: 50%; border: 3px solid var(--madera); pointer-events: none; animation: toque .45s ease-out forwards; }
+@keyframes toque { from { transform: scale(.4); opacity: 1; } to { transform: scale(1.4); opacity: 0; } }
+.palanca { width: clamp(64px, 100%, 92px); aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle at 50% 40%, #e4dfd5, #bdb6a9); position: relative; touch-action: none; box-shadow: inset 0 3px 6px rgba(0,0,0,.18); }
+.palanca .bola { position: absolute; left: 50%; top: 50%; width: 58%; aspect-ratio: 1; margin: -29% 0 0 -29%; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #6a6478, #3a3446); box-shadow: 0 4px 8px rgba(0,0,0,.35); transition: transform .12s ease-out; }
+.palanca.moviendo .bola { transition: none; }
+.cruceta { width: clamp(70px, 92%, 104px); aspect-ratio: 1; display: grid; grid-template: repeat(3, 1fr) / repeat(3, 1fr); }
+.cruceta button { border: 0; background: var(--gris-boton); color: #d9d3e3; font-size: .8rem; }
+.cruceta .arr { grid-area: 1 / 2; border-radius: 6px 6px 0 0; } .cruceta .izq { grid-area: 2 / 1; border-radius: 6px 0 0 6px; }
+.cruceta .centro { grid-area: 2 / 2; background: var(--gris-boton); } .cruceta .der { grid-area: 2 / 3; border-radius: 0 6px 6px 0; }
+.cruceta .aba { grid-area: 3 / 2; border-radius: 0 0 6px 6px; }
+.letras { width: clamp(80px, 100%, 112px); aspect-ratio: 1; position: relative; }
+.letras button { position: absolute; width: 38%; aspect-ratio: 1; border-radius: 50%; border: 0; color: #fff; font-weight: 800; font-size: 1.05rem; box-shadow: 0 3px 0 rgba(0,0,0,.25); }
+.letras .x { left: 31%; top: 0; background: #e5484d; } .letras .y { left: 0; top: 31%; background: #3e8ef7; }
+.letras .a { right: 0; top: 31%; background: #d98a1f; } .letras .b { left: 31%; bottom: 0; background: #2f9c69; }
+.pie { display: flex; justify-content: center; align-items: center; gap: 22px; margin-top: 16px; }
+.redondo { width: 40px; height: 40px; border-radius: 50%; border: 0; background: #d6d0c4; color: #3b3548; font-weight: 800; font-size: 1.15rem; box-shadow: 0 2px 0 #b2ab9e; }
+.redondo.home { width: 48px; height: 48px; background: #3b3548; color: var(--mando); font-size: .75rem; }
+.pulsado, .mando button:active { transform: translateY(2px); filter: brightness(.9); box-shadow: none !important; }
+.opciones { display: flex; flex-wrap: wrap; gap: .75rem 1.5rem; align-items: center; margin: 1rem .25rem 0; color: var(--hilo-suave); font-size: .95rem; }
+.segmento { display: inline-flex; border: 1px solid var(--telon); border-radius: 999px; padding: 3px; }
+.segmento button { border: 0; background: none; padding: .25rem .9rem; border-radius: 999px; color: var(--hilo-suave); }
+.segmento button[aria-pressed="true"] { background: var(--madera); color: #2a1a08; font-weight: 700; }
+.teclas { margin: .6rem .25rem 0; color: var(--hilo-suave); font-size: .9rem; }
+@media (pointer: coarse) { .teclas { display: none; } }
+kbd { font: inherit; font-weight: 700; color: var(--hilo); background: var(--terciopelo); border-radius: 5px; padding: 0 .35rem; }
+@media (max-width: 640px) {
+  .mando { border-radius: 36px; padding: 22px 12px 16px; }
+  .cara { grid-template-columns: 1fr 1fr; grid-template-areas: "pantalla pantalla" "izq der"; }
+  .marco { grid-area: pantalla; } .lado.izquierdo { grid-area: izq; } .lado.derecho { grid-area: der; }
+  .lado { grid-auto-flow: column; align-items: center; gap: 12px; }
+  .hombros { inset: -12px 18px auto; } .gatillo { min-width: 44px; padding: 3px 10px 5px; }
+  .palanca { width: 60px; } .cruceta { width: 84px; } .letras { width: 92px; } .letras button { font-size: .9rem; }
+}
+
+/* ---------- pestañas ---------- */
+.bastidores { background: var(--terciopelo); border-radius: 22px; padding: .5rem; min-height: 420px; display: flex; flex-direction: column; }
+.pestanas { display: flex; gap: .25rem; padding: .25rem; overflow-x: auto; }
+.pestanas button { border: 0; background: none; color: var(--hilo-suave); padding: .5rem .9rem; border-radius: 12px; white-space: nowrap; }
+@media (max-width: 480px) { .pestanas { gap: 0; justify-content: space-between; } .pestanas button { padding: .45rem .4rem; font-size: .875rem; } }
+.pestanas button[aria-selected="true"] { background: var(--noche); color: var(--hilo); font-weight: 700; }
+.hoja { padding: 1rem 1rem 1.25rem; overflow: auto; max-height: calc(100vh - 210px); }
+@media (max-width: 980px) { .hoja { max-height: none; } }
+.hoja h2 { font-size: 1.3rem; line-height: 1.2; margin: 0 0 .75rem; }
+.hoja p { margin: .25rem 0 .9rem; color: var(--hilo-suave); }
+.buscar { width: 100%; padding: .6rem .8rem; border-radius: 12px; border: 1px solid var(--telon); background: var(--noche); margin-bottom: .75rem; }
+.lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.lista > li > button, .fila { width: 100%; text-align: left; display: flex; align-items: center; gap: .75rem; padding: .6rem .7rem; border: 0; border-radius: 10px; background: none; }
+.lista > li > button:hover, .fila:hover { background: rgba(255,255,255,.05); }
+.lista small, .fila small { margin-left: auto; color: var(--hilo-suave); font-size: .85rem; white-space: nowrap; }
+.vacio { color: var(--hilo-suave); padding: 1rem .25rem; }
+.migas { display: flex; flex-wrap: wrap; gap: .1rem; margin-bottom: .6rem; }
+.migas button { border: 0; background: none; color: var(--madera); padding: .1rem .3rem; border-radius: 6px; }
+.fila .nombre { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; flex: 1 1 auto; }
+@media (max-width: 480px) {
+  .fila { flex-wrap: wrap; row-gap: .15rem; }
+  .fila .nombre { flex-basis: 100%; }
+  .fila small { margin-left: 0; }
+  .lista .fila .acciones { margin-left: auto; }
+}
+.fila button.nombre { border: 0; background: none; padding: 0; text-align: left; color: var(--hilo); }
+.fila button.nombre:hover { color: var(--madera); }
+.fila .acciones { display: flex; gap: .25rem; margin-left: .5rem; }
+.icono-btn { border: 0; background: none; border-radius: 8px; padding: .25rem .45rem; color: var(--hilo-suave); }
+.icono-btn:hover { color: var(--hilo); background: var(--noche); }
+.barra-acciones { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: .9rem; align-items: center; }
+.boton { border: 1px solid var(--telon); background: var(--noche); border-radius: 12px; padding: .55rem 1rem; }
+.boton:hover { border-color: var(--madera); }
+.boton.principal { background: var(--madera); color: #2a1a08; border-color: var(--madera); font-weight: 700; }
+.boton.peligro-btn { position: relative; overflow: hidden; border-color: rgba(229,72,77,.6); color: #ffb3b5; }
+.boton.peligro-btn .relleno { position: absolute; inset: 0; background: rgba(229,72,77,.35); transform-origin: left; transform: scaleX(0); }
+.boton.peligro-btn span { position: relative; }
+.boton.ancho { width: 100%; padding: .8rem; font-size: 1.05rem; }
+.datos { display: grid; grid-template-columns: minmax(7rem, 1fr) minmax(0, max-content); gap: .45rem 1rem; margin: 0 0 1.25rem; }
+.datos dt { color: var(--hilo-suave); } .datos dd { margin: 0; overflow-wrap: break-word; }
+.medidor { height: 8px; border-radius: 99px; background: var(--noche); overflow: hidden; margin-top: .3rem; max-width: 220px; }
+.medidor i { display: block; height: 100%; background: var(--pantalla); }
+.grupo { border-top: 1px solid var(--telon); padding-top: 1rem; margin-top: 1rem; }
+.form-linea { display: flex; gap: .5rem; }
+.form-linea input { flex: 1; min-width: 0; padding: .55rem .8rem; border-radius: 12px; border: 1px solid var(--telon); background: var(--noche); }
+pre.registro { white-space: pre-wrap; word-break: break-word; font: .85rem/1.45 ui-monospace, Menlo, Consolas, monospace; background: var(--noche); border-radius: 12px; padding: .8rem; margin: 0 0 1rem; max-height: 50vh; overflow: auto; }
+
+dialog { border: 0; border-radius: 20px; background: var(--terciopelo); color: var(--hilo); padding: 1.5rem; max-width: min(28rem, 92vw); }
+dialog::backdrop { background: rgba(10, 6, 18, .7); }
+dialog h3 { font-size: 1.25rem; line-height: 1.25; margin: 0 0 .5rem; }
+dialog .botones { display: flex; justify-content: flex-end; gap: .5rem; margin-top: 1.25rem; }
+dialog input { width: 100%; padding: .55rem .8rem; border-radius: 12px; border: 1px solid var(--telon); background: var(--noche); }
+.avisos { position: fixed; left: 50%; bottom: 1.25rem; transform: translateX(-50%); display: grid; gap: .5rem; z-index: 10; width: min(30rem, 92vw); }
+.avisos div { background: var(--hilo); color: var(--noche); padding: .65rem 1rem; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.4); }
+.avisos div.mal { background: #ffd9da; color: #5c0f12; }
+.progreso { height: 6px; background: var(--noche); border-radius: 99px; overflow: hidden; margin-top: .4rem; }
+.progreso i { display: block; height: 100%; width: 0; background: var(--madera); }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<header class="cabecera">
+  <img src="/icono.svg" alt="">
+  <h1>Titiritero</h1>
+  <div class="estado" id="estado" data-vivo="">
+    <span id="estado-texto" data-t="conectando"></span><span class="luz" aria-hidden="true"></span>
+  </div>
+</header>
+
+<!-- Emparejar -->
+<section class="emparejar" id="vista-emparejar" hidden>
+  <h2 data-t="emp_titulo"></h2>
+  <ol>
+    <li data-t="emp_paso1"></li>
+    <li data-t="emp_paso2"></li>
+    <li data-t="emp_paso3"></li>
+  </ol>
+  <form class="tarjeta" id="form-emparejar">
+    <label class="campo"><span data-t="emp_codigo"></span>
+      <input class="codigo" id="codigo" inputmode="numeric" autocomplete="one-time-code" maxlength="7" placeholder="000 000" required></label>
+    <label class="campo"><span data-t="emp_nombre"></span>
+      <input id="nombre-movil" maxlength="30" required></label>
+    <button class="boton principal ancho" id="boton-emparejar" data-t="emp_boton"></button>
+    <p class="mensaje-emp" id="mensaje-emp" role="status" aria-live="polite"></p>
+  </form>
+</section>
+
+<!-- Panel -->
+<p class="peligro" id="aviso-ftp" hidden data-t="aviso_ftp"></p>
+<main class="escenario" id="vista-panel" hidden>
+  <section class="teatro" data-ta="mando_aria">
+    <svg class="hilos" id="hilos" aria-hidden="true"></svg>
+    <div class="mando">
+      <div class="hombros">
+        <div><button class="gatillo z" data-b="ZL">ZL</button><button class="gatillo" data-b="L">L</button></div>
+        <div><button class="gatillo" data-b="R">R</button><button class="gatillo z" data-b="ZR">ZR</button></div>
+      </div>
+      <div class="cara">
+        <div class="lado izquierdo">
+          <div class="palanca" data-palanca="izq" role="slider" data-ta="palanca_izq" tabindex="0"><div class="bola"></div></div>
+          <div class="cruceta" role="group" data-ta="cruceta">
+            <button class="arr" data-b="ARRIBA" data-ta="arriba">▲</button>
+            <button class="izq" data-b="IZQUIERDA" data-ta="izquierda">◀</button>
+            <span class="centro"></span>
+            <button class="der" data-b="DERECHA" data-ta="derecha">▶</button>
+            <button class="aba" data-b="ABAJO" data-ta="abajo">▼</button>
+          </div>
+        </div>
+        <div class="marco">
+          <div class="pantalla" id="pantalla" data-ta="pantalla_aria">
+            <img id="imagen" alt="">
+            <div class="velo" id="velo"><strong data-t="conectando"></strong></div>
+          </div>
+        </div>
+        <div class="lado derecho">
+          <div class="letras" role="group" aria-label="A B X Y">
+            <button class="x" data-b="X">X</button><button class="y" data-b="Y">Y</button>
+            <button class="a" data-b="A">A</button><button class="b" data-b="B">B</button>
+          </div>
+          <div class="palanca" data-palanca="der" role="slider" data-ta="palanca_der" tabindex="0"><div class="bola"></div></div>
+        </div>
+      </div>
+      <div class="pie">
+        <button class="redondo" data-b="MENOS" aria-label="−">−</button>
+        <button class="redondo home" data-b="HOME">HOME</button>
+        <button class="redondo" data-b="MAS" aria-label="+">+</button>
+      </div>
+    </div>
+    <div class="opciones">
+      <span data-t="ver"></span>
+      <span class="segmento" role="group">
+        <button data-ver="gamepad" aria-pressed="true">GamePad</button><button data-ver="tv" aria-pressed="false" data-t="tele"></button>
+      </span>
+      <span class="segmento" role="group">
+        <button data-calidad="fluida" aria-pressed="true" data-t="fluida"></button><button data-calidad="nitida" aria-pressed="false" data-t="nitida"></button>
+      </span>
+      <span id="fps"></span>
+    </div>
+    <p class="teclas" data-t="teclas"></p>
+  </section>
+
+  <aside class="bastidores">
+    <div class="pestanas" role="tablist">
+      <button role="tab" data-hoja="juegos" aria-selected="true" data-t="juegos"></button>
+      <button role="tab" data-hoja="apps" aria-selected="false" data-t="apps"></button>
+      <button role="tab" data-hoja="archivos" aria-selected="false" data-t="archivos"></button>
+      <button role="tab" data-hoja="consola" aria-selected="false" data-t="consola"></button>
+      <button role="tab" data-hoja="registro" aria-selected="false" data-t="registro"></button>
+    </div>
+    <section class="hoja" id="hoja-juegos" role="tabpanel">
+      <input class="buscar" id="buscar-juegos" type="search" data-tp="buscar_juego">
+      <ul class="lista" id="lista-juegos"><li class="vacio" data-t="cargando"></li></ul>
+    </section>
+    <section class="hoja" id="hoja-apps" role="tabpanel" hidden>
+      <p data-t="apps_texto"></p>
+      <ul class="lista" id="lista-apps"><li class="vacio" data-t="cargando"></li></ul>
+    </section>
+    <section class="hoja" id="hoja-archivos" role="tabpanel" hidden>
+      <nav class="migas" id="migas"></nav>
+      <div class="barra-acciones">
+        <label class="boton principal"><span data-t="subir"></span><input type="file" id="subir" multiple class="oculto"></label>
+        <button class="boton" id="nueva-carpeta" data-t="nueva_carpeta"></button>
+        <span id="espacio" style="color:var(--hilo-suave)"></span>
+      </div>
+      <div id="progreso-subida"></div>
+      <ul class="lista" id="lista-archivos"></ul>
+    </section>
+    <section class="hoja" id="hoja-consola" role="tabpanel" hidden>
+      <h2 data-t="la_consola"></h2>
+      <dl class="datos" id="datos"></dl>
+      <div class="barra-acciones">
+        <button class="boton" id="menu" data-t="volver_menu"></button>
+        <button class="boton" id="reiniciar" data-t="reiniciar"></button>
+        <button class="boton peligro-btn" id="apagar"><i class="relleno"></i><span data-t="mantener_apagar"></span></button>
+      </div>
+      <div class="grupo">
+        <h2 data-t="encontrar"></h2>
+        <p data-t="encontrar_texto"></p>
+        <button class="boton" id="vibrar" data-t="vibrar"></button>
+      </div>
+      <div class="grupo">
+        <h2 data-t="mensaje"></h2>
+        <p data-t="mensaje_texto"></p>
+        <form class="form-linea" id="form-aviso">
+          <input id="texto-aviso" maxlength="180" data-tp="mensaje_ejemplo" required>
+          <button class="boton principal" data-t="enviar"></button>
+        </form>
+      </div>
+      <div class="grupo">
+        <h2 data-t="permisos"></h2>
+        <p data-t="permisos_texto"></p>
+        <dl class="datos" id="permisos"></dl>
+      </div>
+      <div class="grupo">
+        <h2 data-t="otro_movil"></h2>
+        <p data-t="otro_movil_texto"></p>
+        <button class="boton" id="invitar" data-t="mostrar_qr"></button>
+      </div>
+      <div class="grupo">
+        <h2 data-t="este_movil"></h2>
+        <p id="este-movil"></p>
+        <button class="boton peligro-btn" id="olvidar"><span data-t="olvidar"></span></button>
+      </div>
+    </section>
+    <section class="hoja" id="hoja-registro" role="tabpanel" hidden>
+      <h2 data-t="registro_titulo"></h2>
+      <pre class="registro" id="log-plugin"></pre>
+      <button class="boton" id="refrescar-registro" data-t="actualizar"></button>
+    </section>
+  </aside>
+</main>
+
+<dialog id="dialogo">
+  <form method="dialog">
+    <h3 id="dialogo-titulo"></h3>
+    <p id="dialogo-texto" style="color:var(--hilo-suave);margin:0"></p>
+    <input id="dialogo-campo" hidden>
+    <div class="botones">
+      <button class="boton" value="no" data-t="cancelar"></button>
+      <button class="boton principal" id="dialogo-si" value="si"></button>
+    </div>
+  </form>
+</dialog>
+<div class="avisos" id="avisos" role="status" aria-live="polite"></div>
+
+<script>
+/*CRIPTO*/
+</script>
+<script>
+"use strict";
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const ANCHO = 854, ALTO = 480;
+
+/* ---------- textos (español e inglés según el navegador) ---------- */
+const TEXTOS = {
+  es: {
+    conectando: "Conectando con la consola…", en_vivo: "En vivo", en_pausa: "En pausa desde la consola", sin_respuesta: "La consola no responde",
+    emp_titulo: "Empareja este móvil con tu Wii U",
+    sin_emparejar: "Sin emparejar",
+    emp_paso1: "En el <strong>GamePad</strong>, pulsa a la vez <strong>L + ↓ + −</strong>: se abre el menú de plugins de Aroma.",
+    emp_paso2: "Entra en <strong>Titiritero → Emparejar un móvil</strong> y pon <strong>«Mostrar el QR al cerrar este menú»</strong> en <strong>Sí</strong>. Cierra el menú con B.",
+    emp_paso3: "Escanea el QR de la pantalla con la cámara del móvil. O escribe aquí el código que sale debajo:",
+    emp_codigo: "Código de 6 cifras", emp_nombre: "Nombre de este móvil (para reconocerlo en la consola)", emp_boton: "Emparejar",
+    emp_trabajando: "Emparejando…", emp_ok: "¡Listo! Este móvil ya maneja la consola.",
+    emp_mal_codigo: "Ese código no es. Revisa las 6 cifras de la pantalla de la consola.",
+    emp_sin_codigo: "La consola no está esperando ningún código. Vuelve a abrir el menú de Titiritero (L + ↓ + −).",
+    emp_consola_falsa: "La consola no ha demostrado conocer el código. No se ha guardado nada.",
+    aviso_ftp: "El FTP de la consola (ftpiiu) está encendido: cualquiera de tu red puede entrar en la tarjeta SD sin contraseña. Apágalo en el menú de plugins de Aroma si no lo estás usando.",
+    mando_aria: "GamePad de la consola", palanca_izq: "Palanca izquierda", palanca_der: "Palanca derecha", cruceta: "Cruceta",
+    arriba: "Arriba", abajo: "Abajo", izquierda: "Izquierda", derecha: "Derecha", pantalla_aria: "Pantalla en vivo. Tócala para tocar la del GamePad.",
+    ver: "Ver", tele: "Tele", fluida: "Más fluida", nitida: "Más nítida", ips: "imágenes por segundo",
+    teclas: "Teclado: <kbd>flechas</kbd> cruceta, <kbd>Intro</kbd> A, <kbd>Retroceso</kbd> B, <kbd>X</kbd> <kbd>Y</kbd>, <kbd>Q</kbd> <kbd>E</kbd> L y R, <kbd>1</kbd> <kbd>3</kbd> ZL y ZR, <kbd>+</kbd> <kbd>−</kbd>, <kbd>H</kbd> HOME. Lo que mantienes pulsado, se mantiene en la consola.",
+    juegos: "Juegos", apps: "Apps", archivos: "Archivos", consola: "Consola", registro: "Registro",
+    buscar_juego: "Buscar un juego", cargando: "Cargando…", ninguno: "Ningún juego coincide.",
+    apps_texto: "Apps caseras de la tarjeta SD. Se abren directamente.", sin_apps: "No hay apps en wiiu/apps de la tarjeta SD.",
+    abrir_q: "¿Abrir {0}?", se_cierra: "Se cerrará lo que esté abierto ahora.", abrir: "Abrir", abriendo: "Abriendo {0}",
+    disco_usb: "Disco USB", memoria: "Consola",
+    subir: "Subir archivos", nueva_carpeta: "Nueva carpeta", libres: "{0} libres", subir_nivel: "Subir un nivel",
+    descargar: "Descargar", borrar: "Borrar", borrar_q: "¿Borrar {0}?", solo_vacia: "Solo se puede borrar si está vacía.",
+    no_deshacer: "No se puede deshacer.", borrado: "Borrado {0}", vacia: "Carpeta vacía.", subiendo: "Subiendo {0} ({1})",
+    preparando: "Preparando {0}…", subido: "Subido {0}", fallo_subida: "Falló la subida de {0}", crear: "Crear", nombre: "Nombre", creada: "Creada {0}",
+    la_consola: "La consola", abierto: "Abierto ahora", bateria: "Batería del GamePad", sd: "Tarjeta SD", sd_de: "{0} libres de {1}",
+    encendida: "Encendida", sistema: "Sistema", modelo: "Modelo", plugin: "Plugin", no_disponible: "No disponible",
+    bat: ["Casi vacía", "Muy baja", "Baja", "Media", "Alta", "Llena", "Cargando o llena"],
+    volver_menu: "Volver al menú", reiniciar: "Reiniciar", mantener_apagar: "Mantén para apagar",
+    reiniciar_q: "¿Reiniciar la consola?", vuelve_25: "Vuelve sola en unos 25 segundos.", reiniciando: "Reiniciando: vuelve en unos 25 segundos",
+    volviendo: "Volviendo al menú", apagando: "Apagando. Para encenderla hará falta su botón.",
+    encontrar: "Encontrar el GamePad", encontrar_texto: "Lo hace vibrar un segundo.", vibrar: "Hacerlo vibrar", vibrando: "Vibrando",
+    mensaje: "Mensaje en la pantalla", mensaje_texto: "Sale como aviso encima de lo que esté abierto.", mensaje_ejemplo: "La cena está lista",
+    enviar: "Enviar", enviado: "Mensaje enviado",
+    permisos: "Permisos", permisos_texto: "Se cambian en la consola: L + ↓ + − → Titiritero. Con L + R + − se pausa todo al momento.",
+    permitido: "Permitido", desactivado: "Desactivado en la consola",
+    p: { ver: "Ver la pantalla", mandos: "Pulsar y tocar", abrir: "Abrir juegos y apps", energia: "Menú, reinicio y apagado", avisos: "Mensajes y vibración", leer: "Ver archivos", escribir: "Subir y borrar archivos" },
+    otro_movil: "Emparejar otro móvil", otro_movil_texto: "Saca un QR nuevo en la pantalla de la consola para que otro móvil lo escanee.",
+    mostrar_qr: "Mostrar el QR en la consola", qr_mostrado: "Mira la pantalla de la consola",
+    este_movil: "Este móvil", este_movil_texto: "Emparejado como «{0}».", olvidar: "Olvidar este móvil",
+    olvidar_q: "¿Olvidar este móvil?", olvidar_texto: "Para volver a usarlo habrá que emparejarlo otra vez.",
+    registro_titulo: "Lo que ha pasado en el plugin", actualizar: "Actualizar", vacio: "(vacío)", cancelar: "Cancelar",
+    tele_sin_imagen: "La tele no recibe imagen", tele_sin_imagen_texto: "Lo que está abierto no manda nada a la tele (por ejemplo, si juegas solo en el GamePad).",
+    sin_imagen: "Sin imagen", tocar_gamepad: "Para tocar, cambia la vista al GamePad.", h_min: "{0} h {1} min",
+    olvidado: "La consola ya no reconoce este móvil. Empareja otra vez.",
+  },
+  en: {
+    conectando: "Connecting to the console…", en_vivo: "Live", en_pausa: "Paused on the console", sin_respuesta: "The console isn't answering",
+    emp_titulo: "Pair this phone with your Wii U",
+    sin_emparejar: "Not paired",
+    emp_paso1: "On the <strong>GamePad</strong>, press <strong>L + ↓ + −</strong> together: the Aroma plugin menu opens.",
+    emp_paso2: "Go to <strong>Titiritero → Pair a phone</strong> and set <strong>“Show the QR code when this menu closes”</strong> to <strong>Yes</strong>. Close the menu with B.",
+    emp_paso3: "Scan the QR code on the screen with your phone's camera. Or type the code shown below it:",
+    emp_codigo: "6-digit code", emp_nombre: "Name for this phone (to recognise it on the console)", emp_boton: "Pair",
+    emp_trabajando: "Pairing…", emp_ok: "Done! This phone now controls the console.",
+    emp_mal_codigo: "That code isn't right. Check the 6 digits on the console's screen.",
+    emp_sin_codigo: "The console isn't waiting for a code. Open the Titiritero menu again (L + ↓ + −).",
+    emp_consola_falsa: "The console didn't prove it knows the code. Nothing was saved.",
+    aviso_ftp: "The console's FTP (ftpiiu) is on: anyone on your network can open the SD card without a password. Turn it off in the Aroma plugin menu if you aren't using it.",
+    mando_aria: "Console GamePad", palanca_izq: "Left stick", palanca_der: "Right stick", cruceta: "D-pad",
+    arriba: "Up", abajo: "Down", izquierda: "Left", derecha: "Right", pantalla_aria: "Live screen. Tap it to tap the GamePad's screen.",
+    ver: "View", tele: "TV", fluida: "Smoother", nitida: "Sharper", ips: "frames per second",
+    teclas: "Keyboard: <kbd>arrows</kbd> D-pad, <kbd>Enter</kbd> A, <kbd>Backspace</kbd> B, <kbd>X</kbd> <kbd>Y</kbd>, <kbd>Q</kbd> <kbd>E</kbd> L and R, <kbd>1</kbd> <kbd>3</kbd> ZL and ZR, <kbd>+</kbd> <kbd>−</kbd>, <kbd>H</kbd> HOME. Whatever you hold, is held on the console.",
+    juegos: "Games", apps: "Apps", archivos: "Files", consola: "Console", registro: "Log",
+    buscar_juego: "Search a game", cargando: "Loading…", ninguno: "No game matches.",
+    apps_texto: "Homebrew apps on the SD card. They open straight away.", sin_apps: "No apps in wiiu/apps on the SD card.",
+    abrir_q: "Open {0}?", se_cierra: "Whatever is open now will close.", abrir: "Open", abriendo: "Opening {0}",
+    disco_usb: "USB drive", memoria: "Console",
+    subir: "Upload files", nueva_carpeta: "New folder", libres: "{0} free", subir_nivel: "Up one level",
+    descargar: "Download", borrar: "Delete", borrar_q: "Delete {0}?", solo_vacia: "Only possible if it's empty.",
+    no_deshacer: "This can't be undone.", borrado: "Deleted {0}", vacia: "Empty folder.", subiendo: "Uploading {0} ({1})",
+    preparando: "Preparing {0}…", subido: "Uploaded {0}", fallo_subida: "Upload of {0} failed", crear: "Create", nombre: "Name", creada: "Created {0}",
+    la_consola: "The console", abierto: "Open now", bateria: "GamePad battery", sd: "SD card", sd_de: "{0} free of {1}",
+    encendida: "Turned on", sistema: "System", modelo: "Model", plugin: "Plugin", no_disponible: "Not available",
+    bat: ["Almost empty", "Very low", "Low", "Medium", "High", "Full", "Charging or full"],
+    volver_menu: "Back to the menu", reiniciar: "Restart", mantener_apagar: "Hold to power off",
+    reiniciar_q: "Restart the console?", vuelve_25: "It comes back by itself in about 25 seconds.", reiniciando: "Restarting: back in about 25 seconds",
+    volviendo: "Going back to the menu", apagando: "Powering off. You'll need its button to turn it on.",
+    encontrar: "Find the GamePad", encontrar_texto: "It rumbles for a second.", vibrar: "Make it rumble", vibrando: "Rumbling",
+    mensaje: "Message on the screen", mensaje_texto: "It pops up over whatever is open.", mensaje_ejemplo: "Dinner is ready",
+    enviar: "Send", enviado: "Message sent",
+    permisos: "Permissions", permisos_texto: "Changed on the console: L + ↓ + − → Titiritero. L + R + − pauses everything instantly.",
+    permitido: "Allowed", desactivado: "Turned off on the console",
+    p: { ver: "See the screen", mandos: "Press and touch", abrir: "Open games and apps", energia: "Menu, restart and power off", avisos: "Messages and rumble", leer: "View files", escribir: "Upload and delete files" },
+    otro_movil: "Pair another phone", otro_movil_texto: "Shows a new QR code on the console's screen for another phone to scan.",
+    mostrar_qr: "Show the QR on the console", qr_mostrado: "Look at the console's screen",
+    este_movil: "This phone", este_movil_texto: "Paired as “{0}”.", olvidar: "Forget this phone",
+    olvidar_q: "Forget this phone?", olvidar_texto: "To use it again you'll have to pair it again.",
+    registro_titulo: "What happened in the plugin", actualizar: "Refresh", vacio: "(empty)", cancelar: "Cancel",
+    tele_sin_imagen: "The TV gets no picture", tele_sin_imagen_texto: "Whatever is open isn't sending anything to the TV (for example, if you play on the GamePad only).",
+    sin_imagen: "No picture", tocar_gamepad: "To touch, switch the view to the GamePad.", h_min: "{0} h {1} min",
+    olvidado: "The console no longer knows this phone. Pair it again.",
+  },
+};
+const L = TEXTOS[(navigator.language || "es").toLowerCase().startsWith("es") ? "es" : "en"];
+document.documentElement.lang = L === TEXTOS.es ? "es" : "en";
+const t = (k, ...a) => (L[k] ?? k).replace(/\{(\d)\}/g, (_, i) => a[i]);
+function traducir() {
+  $$("[data-t]").forEach(e => { e.innerHTML = L[e.dataset.t]; });   /* textos propios, fijos: sin datos de fuera */
+  $$("[data-ta]").forEach(e => e.setAttribute("aria-label", L[e.dataset.ta]));
+  $$("[data-tp]").forEach(e => e.setAttribute("placeholder", L[e.dataset.tp]));
+}
+traducir();
+
+/* ---------- credenciales de este móvil ---------- */
+const CRED = "titiritero-credencial";
+function leerCred() { try { return JSON.parse(localStorage.getItem(CRED)); } catch (e) { return null; } }
+function guardarCred(c) { try { localStorage.setItem(CRED, JSON.stringify(c)); } catch (e) {} }
+function borrarCred() { try { localStorage.removeItem(CRED); } catch (e) {} }
+let cred = leerCred();
+
+/* ---------- órdenes firmadas ---------- */
+const VACIO = Cripto.hex(Cripto.sha256(new Uint8Array(0)));
+let sesion = null, cola = Promise.resolve();
+class NoEmparejado extends Error {}
+function enCola(fn) { const p = cola.then(fn, fn); cola = p.catch(() => {}); return p; }
+
+async function nuevoReto() {
+  const r = await fetch(`/reto?disp=${cred.disp}`, { cache: "no-store" });
+  const txt = await r.text();
+  if (r.status === 403) throw new NoEmparejado(txt);
+  if (!r.ok) throw new Error(txt.trim());
+  sesion = { ...JSON.parse(txt), contador: 0 };
+}
+
+function cabeceras(metodo, ruta, consulta, hashCuerpo) {
+  sesion.contador++;
+  const texto = [sesion.reto, sesion.contador, metodo, ruta, consulta, hashCuerpo].join("\n");
+  return { "X-Sesion": String(sesion.sesion), "X-Contador": String(sesion.contador), "X-Cuerpo": hashCuerpo,
+           "X-Firma": Cripto.hex(Cripto.hmac(cred.clave, texto)) };
+}
+
+/* Una orden firmada. Renueva la sesión una vez si caducó (la consola cambió de app o se reinició). */
+function orden(metodo, ruta, params = {}, cuerpo = null, hashCuerpo = VACIO) {
+  return enCola(async () => {
+    const consulta = new URLSearchParams(params).toString();
+    for (let intento = 0; intento < 2; intento++) {
+      if (!sesion) await nuevoReto();
+      const r = await fetch(ruta + (consulta ? "?" + consulta : ""),
+        { method: metodo, headers: cabeceras(metodo, ruta, consulta, hashCuerpo), body: cuerpo, cache: "no-store" });
+      if (r.ok || r.status === 429) return r;   /* 429: demasiado pronto, la respuesta dice cuánto esperar */
+      const txt = (await r.text()).trim();
+      if (r.status === 403 && /sesion|repetida/.test(txt)) { sesion = null; continue; }
+      if (r.status === 403 && /emparejado/.test(txt)) throw new NoEmparejado(txt);
+      throw new Error(txt || `Error ${r.status}`);
+    }
+    throw new Error(L.sin_respuesta);
+  });
+}
+const json = async (ruta, params) => (await orden("GET", ruta, params)).json();
+
+function siNoEmparejado(e) {
+  if (!(e instanceof NoEmparejado)) return false;
+  borrarCred(); cred = null; sesion = null;
+  mostrarEmparejar(L.olvidado);
+  return true;
+}
+
+/* ---------- avisos y diálogos ---------- */
+function avisar(texto, mal = false) {
+  const d = document.createElement("div");
+  d.textContent = texto;
+  if (mal) d.className = "mal";
+  $("#avisos").append(d);
+  setTimeout(() => d.remove(), mal ? 6000 : 3000);
+}
+async function hacer(metodo, ruta, params, okTexto) {
+  try { const r = await orden(metodo, ruta, params); if (okTexto) avisar(okTexto); return r; }
+  catch (e) { if (!siNoEmparejado(e)) avisar(e.message, true); }
+}
+function preguntar({ titulo, texto = "", si, campo }) {
+  const d = $("#dialogo");
+  $("#dialogo-titulo").textContent = titulo;
+  $("#dialogo-texto").textContent = texto;
+  $("#dialogo-si").textContent = si;
+  const entrada = $("#dialogo-campo");
+  entrada.hidden = !campo; entrada.value = "";
+  if (campo) entrada.placeholder = campo;
+  d.showModal();
+  if (campo) entrada.focus();
+  return new Promise(res => d.addEventListener("close", () => res(d.returnValue === "si" ? (campo ? entrada.value.trim() : true) : null), { once: true }));
+}
+
+/* ---------- emparejar ---------- */
+function nombrePorDefecto() {
+  const ua = navigator.userAgent;
+  const so = /iPhone/.test(ua) ? "iPhone" : /iPad/.test(ua) ? "iPad" : /Android/.test(ua) ? "Android" : /Mac/.test(ua) ? "Mac" : /Windows/.test(ua) ? "Windows" : "Navegador";
+  return `${so} (${new Date().toLocaleDateString()})`;
+}
+
+function mostrarEmparejar(mensaje = "") {
+  $("#vista-panel").hidden = true; $("#aviso-ftp").hidden = true;
+  $("#vista-emparejar").hidden = false;
+  $("#nombre-movil").value ||= nombrePorDefecto();
+  mensajeEmp(mensaje);
+  estado(false, L.sin_emparejar);
+}
+function mensajeEmp(texto, mal = false) { const m = $("#mensaje-emp"); m.textContent = texto; m.classList.toggle("mal", mal); }
+
+async function emparejar(codigo, nombre) {
+  const yo = Cripto.parClaves(), miPub = Cripto.hex(yo.publica);
+  const paso1 = await fetch(`/emparejar?${new URLSearchParams({ pub: miPub, nombre })}`, { method: "POST" });
+  const t1 = await paso1.text();
+  if (!paso1.ok) throw new Error(/codigo activo|demasiados/.test(t1) ? L.emp_sin_codigo : t1);
+  const suPub = JSON.parse(t1).pub;
+  const transcripcion = quien => `titiritero-emparejar\n${quien}\n${miPub}\n${suPub}`;
+  const prueba = Cripto.hex(Cripto.hmac(codigo, transcripcion("cliente")));
+  const paso2 = await fetch(`/emparejar/confirmar?prueba=${prueba}`, { method: "POST" });
+  const t2 = await paso2.text();
+  if (!paso2.ok) throw new Error(/incorrecto/.test(t2) ? L.emp_mal_codigo : /caduc/.test(t2) ? L.emp_sin_codigo : t2);
+  const r = JSON.parse(t2);
+  if (r.prueba !== Cripto.hex(Cripto.hmac(codigo, transcripcion("consola")))) throw new Error(L.emp_consola_falsa);
+  const secreto = Cripto.hex(Cripto.x25519(yo.privada, Cripto.deHex(suPub)));
+  const clave = Cripto.hex(Cripto.sha256(`titiritero-clave\n${secreto}\n${miPub}\n${suPub}`));
+  cred = { disp: r.id, clave, nombre };
+  guardarCred(cred);
+  sesion = null;
+}
+
+$("#form-emparejar").addEventListener("submit", async e => {
+  e.preventDefault();
+  const codigo = $("#codigo").value.replace(/\D/g, "");
+  if (codigo.length !== 6) return mensajeEmp(L.emp_mal_codigo, true);
+  $("#boton-emparejar").disabled = true;
+  mensajeEmp(L.emp_trabajando);
+  try {
+    await emparejar(codigo, $("#nombre-movil").value.trim() || nombrePorDefecto());
+    mensajeEmp(L.emp_ok);
+    history.replaceState(null, "", "/");
+    setTimeout(arrancarPanel, 700);
+  } catch (err) { mensajeEmp(err.message, true); }
+  finally { $("#boton-emparejar").disabled = false; }
+});
+$("#codigo").addEventListener("input", e => {
+  const d = e.target.value.replace(/\D/g, "").slice(0, 6);
+  e.target.value = d.length > 3 ? `${d.slice(0, 3)} ${d.slice(3)}` : d;
+});
+
+/* ---------- pantalla en vivo ---------- */
+const vista = { de: "gamepad", fluida: true, fallos: 0, activa: false };
+let urlAnterior = null, cuadros = 0, desde = performance.now();
+const dormir = ms => new Promise(r => setTimeout(r, ms));
+function velo(titulo, texto) {
+  const v = $("#velo");
+  v.hidden = !titulo;
+  if (!titulo) return;
+  v.replaceChildren();
+  const s = document.createElement("strong"); s.textContent = titulo; v.append(s);
+  if (texto) { const p = document.createElement("span"); p.textContent = texto; v.append(p); }
+}
+function estado(vivo, texto) { $("#estado").dataset.vivo = vivo ? "si" : "no"; if (texto) $("#estado-texto").textContent = texto; }
+
+async function cuadro() {
+  const r = await orden("GET", "/pantalla", { de: vista.de, calidad: vista.fluida ? 60 : 85, mitad: vista.fluida && vista.de === "tv" ? 1 : 0 });
+  if (r.status === 429) return dormir(Math.min(1000, (await r.json()).espera || 100));   /* límite de la consola */
+  const url = URL.createObjectURL(await r.blob());
+  $("#imagen").src = url;
+  if (urlAnterior) URL.revokeObjectURL(urlAnterior);
+  urlAnterior = url;
+  cuadros++;
+}
+function contarFps() {
+  const ahora = performance.now();
+  if (ahora - desde < 2000) return;
+  $("#fps").textContent = `${(cuadros * 1000 / (ahora - desde)).toFixed(1)} ${L.ips}`;
+  cuadros = 0; desde = ahora;
+}
+async function bucleVivo() {
+  while (vista.activa) {
+    if (document.hidden) { await dormir(500); continue; }
+    try {
+      await cuadro();
+      if (vista.fallos) estado(true);
+      vista.fallos = 0; velo(null); contarFps();
+    } catch (e) {
+      if (siNoEmparejado(e)) return;
+      vista.fallos++;
+      const tele = vista.de === "tv" && /fotograma/.test(e.message);
+      velo(tele ? L.tele_sin_imagen : L.sin_imagen, tele ? L.tele_sin_imagen_texto : e.message);
+      if (!tele) estado(false, L.sin_respuesta);
+      await dormir(Math.min(4000, 800 * vista.fallos));
+    }
+  }
+}
+$$("[data-ver]").forEach(b => b.addEventListener("click", () => { vista.de = b.dataset.ver; $$("[data-ver]").forEach(x => x.setAttribute("aria-pressed", x === b)); }));
+$$("[data-calidad]").forEach(b => b.addEventListener("click", () => { vista.fluida = b.dataset.calidad === "fluida"; $$("[data-calidad]").forEach(x => x.setAttribute("aria-pressed", x === b)); }));
+
+/* ---------- tocar la pantalla ---------- */
+const pantalla = $("#pantalla");
+let toque = null;
+pantalla.addEventListener("pointerdown", e => {
+  if (vista.de !== "gamepad") return avisar(L.tocar_gamepad);
+  pantalla.setPointerCapture(e.pointerId);
+  toque = { t: performance.now(), x: e.clientX, y: e.clientY };
+});
+pantalla.addEventListener("pointerup", () => {
+  if (!toque) return;
+  const r = pantalla.getBoundingClientRect();
+  const x = Math.round((toque.x - r.left) / r.width * (ANCHO - 1)), y = Math.round((toque.y - r.top) / r.height * (ALTO - 1));
+  const ms = Math.round(Math.min(5000, Math.max(80, performance.now() - toque.t)));
+  const m = document.createElement("span");
+  m.className = "toque"; m.style.left = `${toque.x - r.left}px`; m.style.top = `${toque.y - r.top}px`;
+  pantalla.append(m); setTimeout(() => m.remove(), 500);
+  toque = null;
+  if (navigator.vibrate) navigator.vibrate(8);
+  hacer("POST", "/tocar", { x, y, ms });
+});
+
+/* ---------- botones: lo que se mantiene, se mantiene ---------- */
+const pulsar = (nombre, ms) => hacer("POST", "/botones", { b: nombre, ms: Math.round(Math.min(5000, Math.max(80, ms))) });
+$$("[data-b]").forEach(b => {
+  let t0 = 0;
+  b.addEventListener("pointerdown", e => { b.setPointerCapture(e.pointerId); t0 = performance.now(); b.classList.add("pulsado"); if (navigator.vibrate) navigator.vibrate(6); });
+  const soltar = () => { if (!t0) return; b.classList.remove("pulsado"); pulsar(b.dataset.b, performance.now() - t0); t0 = 0; };
+  b.addEventListener("pointerup", soltar);
+  b.addEventListener("pointercancel", soltar);
+  b.addEventListener("click", e => { if (e.detail === 0) pulsar(b.dataset.b, 120); });
+});
+const TECLAS = { ArrowUp: "ARRIBA", ArrowDown: "ABAJO", ArrowLeft: "IZQUIERDA", ArrowRight: "DERECHA", Enter: "A", Backspace: "B",
+  x: "X", y: "Y", q: "L", e: "R", "1": "ZL", "3": "ZR", "+": "MAS", "=": "MAS", "-": "MENOS", h: "HOME" };
+const abajo = {};
+const enCampo = e => e.target.closest("input, textarea, select, dialog, button, [role=slider]");
+document.addEventListener("keydown", e => {
+  const n = TECLAS[e.key] || TECLAS[e.key.toLowerCase()];
+  if (!n || $("#vista-panel").hidden || enCampo(e) || e.ctrlKey || e.metaKey || e.altKey) return;
+  e.preventDefault();
+  if (!abajo[e.key]) abajo[e.key] = performance.now();
+});
+document.addEventListener("keyup", e => {
+  const n = TECLAS[e.key] || TECLAS[e.key.toLowerCase()];
+  if (!n || !abajo[e.key]) return;
+  pulsar(n, performance.now() - abajo[e.key]);
+  delete abajo[e.key];
+});
+
+/* ---------- palancas ---------- */
+$$("[data-palanca]").forEach(p => {
+  const bola = $(".bola", p);
+  let activa = false, eje = { x: 0, y: 0 }, envio = null;
+  const mover = e => {
+    const r = p.getBoundingClientRect(), radio = r.width / 2;
+    let dx = (e.clientX - r.left - radio) / radio, dy = (e.clientY - r.top - radio) / radio;
+    const largo = Math.hypot(dx, dy);
+    if (largo > 1) { dx /= largo; dy /= largo; }
+    eje = { x: +dx.toFixed(2), y: +(-dy).toFixed(2) };
+    bola.style.transform = `translate(${dx * radio * .55}px, ${dy * radio * .55}px)`;
+  };
+  const enviar = () => orden("POST", "/palanca", { cual: p.dataset.palanca, x: eje.x, y: eje.y, ms: 260 }).catch(() => {});
+  p.addEventListener("pointerdown", e => { p.setPointerCapture(e.pointerId); activa = true; p.classList.add("moviendo"); mover(e); enviar(); envio = setInterval(enviar, 240); });
+  p.addEventListener("pointermove", e => activa && mover(e));
+  const soltar = () => { if (!activa) return; activa = false; clearInterval(envio); p.classList.remove("moviendo"); bola.style.transform = ""; };
+  p.addEventListener("pointerup", soltar);
+  p.addEventListener("pointercancel", soltar);
+  p.addEventListener("keydown", e => {
+    const dir = { ArrowUp: [0, 1], ArrowDown: [0, -1], ArrowLeft: [-1, 0], ArrowRight: [1, 0] }[e.key];
+    if (!dir) return;
+    e.preventDefault();
+    orden("POST", "/palanca", { cual: p.dataset.palanca, x: dir[0], y: dir[1], ms: 250 }).catch(() => {});
+  });
+});
+
+/* ---------- hilos de la cruceta ---------- */
+function dibujarHilos() {
+  const svg = $("#hilos"), w = svg.clientWidth, centro = w / 2, barra = Math.min(w * .7, 560);
+  const izq = centro - barra / 2, der = centro + barra / 2;
+  const hilo = (x1, x2) => `<line x1="${x1}" y1="22" x2="${x2}" y2="92" stroke="#f1e6cf" stroke-width="2" stroke-linecap="round" opacity=".55"/>`;
+  svg.setAttribute("viewBox", `0 0 ${w} 92`);
+  svg.innerHTML = hilo(izq + 14, w * .12) + hilo(der - 14, w * .88) + hilo(centro, centro - w * .1) + hilo(centro, centro + w * .1) +
+    `<rect x="${izq}" y="12" width="${barra}" height="20" rx="10" fill="#e9a23b" stroke="#8a4a14" stroke-width="2"/>
+     <rect x="${centro - 10}" y="0" width="20" height="44" rx="10" fill="#e9a23b" stroke="#8a4a14" stroke-width="2"/>`;
+}
+new ResizeObserver(dibujarHilos).observe($("#hilos"));
+
+/* ---------- pestañas ---------- */
+$$("[role=tab]").forEach(b => b.addEventListener("click", () => abrirHoja(b.dataset.hoja)));
+function abrirHoja(nombre) {
+  $$("[role=tab]").forEach(b => b.setAttribute("aria-selected", b.dataset.hoja === nombre));
+  $$(".hoja").forEach(h => { h.hidden = h.id !== `hoja-${nombre}`; });
+  ({ juegos: cargarJuegos, apps: cargarApps, archivos: () => cargarCarpeta(carpeta), consola: cargarConsola, registro: cargarRegistro }[nombre])();
+}
+function vacio(lista, texto) { const li = document.createElement("li"); li.className = "vacio"; li.textContent = texto; lista.replaceChildren(li); }
+function botonLista(texto, detalle, alPulsar) {
+  const li = document.createElement("li"), b = document.createElement("button"), s = document.createElement("span"), m = document.createElement("small");
+  s.textContent = texto; m.textContent = detalle; b.append(s, m); b.addEventListener("click", alPulsar); li.append(b);
+  return li;
+}
+
+let juegos = null;
+async function cargarJuegos() {
+  try { if (!juegos) juegos = (await json("/titulos")).sort((a, b) => a.nombre.localeCompare(b.nombre)); pintarJuegos(); }
+  catch (e) { if (!siNoEmparejado(e)) vacio($("#lista-juegos"), e.message); }
+}
+function pintarJuegos() {
+  const filtro = $("#buscar-juegos").value.toLowerCase(), lista = $("#lista-juegos");
+  const visibles = juegos.filter(j => j.nombre.toLowerCase().includes(filtro));
+  if (!visibles.length) return vacio(lista, L.ninguno);
+  lista.replaceChildren(...visibles.map(j => botonLista(j.nombre, j.dispositivo === "usb" ? L.disco_usb : j.dispositivo === "mlc" ? L.memoria : j.dispositivo, async () => {
+    if (await preguntar({ titulo: t("abrir_q", j.nombre), texto: L.se_cierra, si: L.abrir })) hacer("POST", "/titulo", { id: j.id }, t("abriendo", j.nombre));
+  })));
+}
+$("#buscar-juegos").addEventListener("input", () => juegos && pintarJuegos());
+
+async function cargarApps() {
+  const lista = $("#lista-apps");
+  try {
+    const apps = (await json("/apps")).sort((a, b) => a.nombre.localeCompare(b.nombre));
+    if (!apps.length) return vacio(lista, L.sin_apps);
+    lista.replaceChildren(...apps.map(a => botonLista(a.nombre, a.ruta.split("/").pop(), async () => {
+      if (await preguntar({ titulo: t("abrir_q", a.nombre), texto: L.se_cierra, si: L.abrir })) hacer("POST", "/abrir", { ruta: a.ruta }, t("abriendo", a.nombre));
+    })));
+  } catch (e) { if (!siNoEmparejado(e)) vacio(lista, e.message); }
+}
+
+/* ---------- archivos ---------- */
+let carpeta = "";
+const tamano = n => n < 1024 ? `${n} B` : n < 1048576 ? `${(n / 1024).toFixed(1)} KB` : n < 1073741824 ? `${(n / 1048576).toFixed(1)} MB` : `${(n / 1073741824).toFixed(1)} GB`;
+async function cargarCarpeta(ruta) {
+  const lista = $("#lista-archivos");
+  if (!lista.children.length) vacio(lista, L.cargando);
+  try {
+    const d = await json("/archivos", { ruta });
+    carpeta = d.ruta;
+    pintarMigas();
+    $("#espacio").textContent = d.libre != null ? t("libres", tamano(d.libre)) : "";
+    const entradas = d.entradas.sort((a, b) => (b.carpeta - a.carpeta) || a.nombre.localeCompare(b.nombre));
+    if (carpeta) entradas.unshift({ nombre: "..", carpeta: true, subir: true });
+    if (!entradas.length) return vacio(lista, L.vacia);
+    lista.replaceChildren(...entradas.map(filaArchivo));
+  } catch (e) { if (!siNoEmparejado(e)) vacio(lista, e.message); }
+}
+function filaArchivo(e) {
+  const li = document.createElement("li"), fila = document.createElement("div");
+  fila.className = "fila";
+  const ruta = carpeta ? `${carpeta}/${e.nombre}` : e.nombre;
+  const nombre = document.createElement(e.carpeta ? "button" : "span");
+  nombre.className = "nombre";
+  nombre.textContent = (e.carpeta ? "📁 " : "") + (e.subir ? L.subir_nivel : e.nombre);
+  if (e.carpeta) nombre.addEventListener("click", () => cargarCarpeta(e.subir ? carpeta.split("/").slice(0, -1).join("/") : ruta));
+  fila.append(nombre);
+  if (!e.subir) {
+    const info = document.createElement("small"), acciones = document.createElement("span");
+    info.textContent = e.carpeta ? "" : tamano(e.bytes);
+    acciones.className = "acciones";
+    if (!e.carpeta) {
+      const bajar = document.createElement("button");
+      bajar.className = "icono-btn"; bajar.textContent = L.descargar;
+      bajar.addEventListener("click", () => descargar(ruta, e.nombre));
+      acciones.append(bajar);
+    }
+    const borrar = document.createElement("button");
+    borrar.className = "icono-btn"; borrar.textContent = L.borrar;
+    borrar.addEventListener("click", async () => {
+      if (!await preguntar({ titulo: t("borrar_q", e.nombre), texto: e.carpeta ? L.solo_vacia : L.no_deshacer, si: L.borrar })) return;
+      if (await hacer("DELETE", "/archivo", { ruta }, t("borrado", e.nombre))) cargarCarpeta(carpeta);
+    });
+    acciones.append(borrar);
+    fila.append(info, acciones);
+  }
+  li.append(fila);
+  return li;
+}
+async function descargar(ruta, nombre) {
+  try {
+    const blob = await (await orden("GET", "/archivo", { ruta })).blob();
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = nombre; a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 30000);
+  } catch (e) { if (!siNoEmparejado(e)) avisar(e.message, true); }
+}
+function pintarMigas() {
+  const migas = $("#migas"), partes = carpeta ? carpeta.split("/") : [];
+  const boton = (texto, ruta) => { const b = document.createElement("button"); b.textContent = texto; b.addEventListener("click", () => cargarCarpeta(ruta)); return b; };
+  migas.replaceChildren(boton("SD", ""));
+  partes.forEach((p, i) => migas.append("/", boton(p, partes.slice(0, i + 1).join("/"))));
+}
+$("#subir").addEventListener("change", async e => {
+  for (const archivo of e.target.files) await subirArchivo(archivo);
+  e.target.value = "";
+  cargarCarpeta(carpeta);
+});
+async function hashArchivo(archivo, alAvanzar) {
+  const h = Cripto.Sha256(), TROZO = 4 << 20;
+  for (let i = 0; i < archivo.size; i += TROZO) {
+    h.sumar(new Uint8Array(await archivo.slice(i, i + TROZO).arrayBuffer()));
+    alAvanzar(Math.min(1, (i + TROZO) / archivo.size));
+  }
+  return Cripto.hex(h.fin());
+}
+async function subirArchivo(archivo) {
+  const ruta = carpeta ? `${carpeta}/${archivo.name}` : archivo.name;
+  const caja = document.createElement("div"), texto = document.createElement("span"), barra = document.createElement("div"), relleno = document.createElement("i");
+  barra.className = "progreso"; barra.append(relleno); caja.append(texto, barra);
+  $("#progreso-subida").append(caja);
+  try {
+    texto.textContent = t("preparando", archivo.name);
+    const hash = await hashArchivo(archivo, f => { relleno.style.width = `${f * 30}%`; });
+    texto.textContent = t("subiendo", archivo.name, tamano(archivo.size));
+    await enCola(() => new Promise(async (res, rej) => {
+      if (!sesion) try { await nuevoReto(); } catch (e) { return rej(e); }
+      const consulta = new URLSearchParams({ ruta }).toString();
+      const x = new XMLHttpRequest();
+      x.open("PUT", `/archivo?${consulta}`);
+      for (const [k, v] of Object.entries(cabeceras("PUT", "/archivo", consulta, hash))) x.setRequestHeader(k, v);
+      x.upload.onprogress = ev => { if (ev.lengthComputable) relleno.style.width = `${30 + ev.loaded / ev.total * 70}%`; };
+      x.onload = () => x.status === 200 ? res() : rej(new Error(x.responseText.trim() || `Error ${x.status}`));
+      x.onerror = () => rej(new Error(t("fallo_subida", archivo.name)));
+      x.send(archivo);
+    }));
+    avisar(t("subido", archivo.name));
+  } catch (e) { if (!siNoEmparejado(e)) avisar(e.message, true); }
+  finally { caja.remove(); }
+}
+$("#nueva-carpeta").addEventListener("click", async () => {
+  const nombre = await preguntar({ titulo: L.nueva_carpeta, si: L.crear, campo: L.nombre });
+  if (nombre && await hacer("POST", "/carpeta", { ruta: carpeta ? `${carpeta}/${nombre}` : nombre }, t("creada", nombre))) cargarCarpeta(carpeta);
+});
+
+/* ---------- consola ---------- */
+function fila(dl, k, v, medida) {
+  const dt = document.createElement("dt"), dd = document.createElement("dd");
+  dt.textContent = k; dd.textContent = v;
+  if (medida != null) { const m = document.createElement("div"), i = document.createElement("i"); m.className = "medidor"; i.style.width = `${Math.round(medida * 100)}%`; m.append(i); dd.append(m); }
+  dl.append(dt, dd);
+}
+async function cargarConsola() {
+  try {
+    const i = await json("/info");
+    actualizarCabecera(i);
+    const dl = $("#datos"); dl.replaceChildren();
+    fila(dl, L.abierto, i.titulo_nombre || i.titulo);
+    fila(dl, L.bateria, i.bateria >= 0 ? L.bat[i.bateria] : L.no_disponible, i.bateria >= 0 ? Math.min(i.bateria, 5) / 5 : null);
+    fila(dl, L.sd, i.sd_total ? t("sd_de", tamano(i.sd_libre), tamano(i.sd_total)) : L.no_disponible, i.sd_total ? 1 - i.sd_libre / i.sd_total : null);
+    fila(dl, L.encendida, t("h_min", Math.floor(i.encendida_s / 3600), Math.floor(i.encendida_s % 3600 / 60)));
+    fila(dl, L.sistema, i.sistema || "?");
+    fila(dl, L.modelo, i.modelo || "?");
+    fila(dl, L.plugin, `Titiritero ${i.version}`);
+    const pm = $("#permisos"); pm.replaceChildren();
+    for (const [k, nombre] of Object.entries(L.p)) fila(pm, nombre, i.en_pausa ? L.en_pausa : i.permisos[k] ? L.permitido : L.desactivado);
+    $("#este-movil").textContent = t("este_movil_texto", cred.nombre || "");
+  } catch (e) { if (!siNoEmparejado(e)) avisar(e.message, true); }
+}
+function actualizarCabecera(i) {
+  $("#aviso-ftp").hidden = !i.ftp_abierto;
+  if (i.en_pausa) return estado(false, L.en_pausa);
+  estado(true, i.titulo_nombre ? `${L.en_vivo} · ${i.titulo_nombre}` : L.en_vivo);
+}
+$("#menu").addEventListener("click", () => hacer("POST", "/menu", {}, L.volviendo));
+$("#reiniciar").addEventListener("click", async () => {
+  if (await preguntar({ titulo: L.reiniciar_q, texto: L.vuelve_25, si: L.reiniciar })) hacer("POST", "/reiniciar", {}, L.reiniciando);
+});
+$("#invitar").addEventListener("click", () => hacer("POST", "/invitar", {}, L.qr_mostrado));
+$("#vibrar").addEventListener("click", () => hacer("POST", "/vibrar", { ms: 1000 }, L.vibrando));
+$("#form-aviso").addEventListener("submit", e => { e.preventDefault(); hacer("POST", "/aviso", { texto: $("#texto-aviso").value }, L.enviado); $("#texto-aviso").value = ""; });
+$("#olvidar").addEventListener("click", async () => {
+  if (!await preguntar({ titulo: L.olvidar_q, texto: L.olvidar_texto, si: L.olvidar })) return;
+  await hacer("POST", "/olvidar");
+  borrarCred(); cred = null; sesion = null; vista.activa = false;
+  mostrarEmparejar();
+});
+(() => {   /* apagar: hay que mantenerlo 1,5 s */
+  const b = $("#apagar"), relleno = $(".relleno", b);
+  let tm = null;
+  const empezar = () => { relleno.style.transition = "transform 1.5s linear"; relleno.style.transform = "scaleX(1)"; tm = setTimeout(apagar, 1500); };
+  const parar = () => { clearTimeout(tm); relleno.style.transition = "none"; relleno.style.transform = "scaleX(0)"; };
+  const apagar = () => { parar(); hacer("POST", "/apagar", { seguro: 1 }, L.apagando); };
+  b.addEventListener("pointerdown", empezar);
+  ["pointerup", "pointerleave", "pointercancel"].forEach(ev => b.addEventListener(ev, parar));
+  b.addEventListener("keydown", e => { if ((e.key === "Enter" || e.key === " ") && !e.repeat) { e.preventDefault(); empezar(); } });
+  b.addEventListener("keyup", parar);
+})();
+
+async function cargarRegistro() {
+  try { $("#log-plugin").textContent = (await (await orden("GET", "/registro")).text()) || L.vacio; }
+  catch (e) { if (!siNoEmparejado(e)) $("#log-plugin").textContent = e.message; }
+}
+$("#refrescar-registro").addEventListener("click", cargarRegistro);
+
+async function vigilar() {
+  while (vista.activa) {
+    try { actualizarCabecera(await json("/info")); } catch (e) { if (siNoEmparejado(e)) return; estado(false, L.sin_respuesta); }
+    await dormir(10000);
+  }
+}
+
+/* ---------- arranque ---------- */
+function arrancarPanel() {
+  $("#vista-emparejar").hidden = true;
+  $("#vista-panel").hidden = false;
+  if (vista.activa) return;
+  vista.activa = true;
+  bucleVivo();
+  vigilar();
+  (async () => { while (!cuadros && !vista.fallos) await dormir(300); cargarJuegos(); })();
+}
+
+/* ¿Sigue valiendo lo guardado en este móvil? (sin pedir nada más que un reto) */
+async function credValida() {
+  if (!cred) return false;
+  try { await nuevoReto(); return true; } catch (e) { return !(e instanceof NoEmparejado); }
+}
+
+/* El código del QR va tras #, que el navegador nunca envía por la red. */
+function codigoDelEnlace() {
+  const codigo = (location.hash.match(/^#(\d{6})$/) || [])[1];
+  if (location.hash) history.replaceState(null, "", "/");
+  return codigo;
+}
+
+function emparejarCon(codigo) {
+  $("#codigo").value = `${codigo.slice(0, 3)} ${codigo.slice(3)}`;
+  $("#form-emparejar").requestSubmit();
+}
+
+(async function inicio() {
+  const codigo = codigoDelEnlace();
+  if (await credValida()) return arrancarPanel();   /* ya emparejado: no se duplica aunque se vuelva a escanear el QR */
+  borrarCred(); cred = null;
+  mostrarEmparejar();
+  if (codigo) emparejarCon(codigo);
+})();
+
+/* Si se escanea el QR con esta página ya abierta, solo cambia lo que va tras #: no se recarga. */
+addEventListener("hashchange", () => {
+  const codigo = codigoDelEnlace();
+  if (codigo && !$("#vista-emparejar").hidden) emparejarCon(codigo);
+});
+</script>
+</body>
+</html>

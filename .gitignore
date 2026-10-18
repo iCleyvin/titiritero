@@ -1,0 +1,7 @@
+plugin/build/
+plugin/*.elf
+plugin/*.wps
+plugin/src/panel_web.h
+plugin/src/pantalla_qr.h
+plugin/web/__pycache__/
+plugin/web/muestra_*.png

@@ -1,0 +1,10 @@
+{
+  "name": "Titiritero",
+  "short_name": "Titiritero",
+  "description": "Maneja tu Wii U desde el móvil",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1e1433",
+  "theme_color": "#1e1433",
+  "icons": [{ "src": "/icono.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}

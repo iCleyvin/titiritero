@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Titiritero: la cruceta de un titiritero mueve un GamePad con cuatro hilos. -->
+  <defs>
+    <linearGradient id="fondo" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2a1b4d"/>
+      <stop offset="1" stop-color="#120b24"/>
+    </linearGradient>
+    <linearGradient id="madera" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f6b54a"/>
+      <stop offset="1" stop-color="#d9822b"/>
+    </linearGradient>
+    <linearGradient id="mando" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fbfaf6"/>
+      <stop offset="1" stop-color="#dcd8cf"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="104" fill="url(#fondo)"/>
+  <circle cx="256" cy="300" r="190" fill="#3b2a6b" opacity="0.45"/>
+
+  <!-- hilos -->
+  <g stroke="#f3e9d2" stroke-width="5" stroke-linecap="round" opacity="0.9">
+    <line x1="112" y1="118" x2="140" y2="292"/>
+    <line x1="400" y1="118" x2="372" y2="292"/>
+    <line x1="256" y1="70"  x2="214" y2="262"/>
+    <line x1="256" y1="166" x2="298" y2="262"/>
+  </g>
+
+  <!-- cruceta -->
+  <g fill="url(#madera)" stroke="#8a4a14" stroke-width="4">
+    <rect x="88" y="104" width="336" height="30" rx="15"/>
+    <rect x="241" y="52" width="30" height="128" rx="15"/>
+  </g>
+  <g fill="#8a4a14">
+    <circle cx="112" cy="119" r="7"/>
+    <circle cx="400" cy="119" r="7"/>
+    <circle cx="256" cy="70" r="7"/>
+    <circle cx="256" cy="166" r="7"/>
+  </g>
+
+  <!-- GamePad -->
+  <rect x="84" y="262" width="344" height="176" rx="58" fill="url(#mando)" stroke="#9a948a" stroke-width="4"/>
+  <rect x="170" y="290" width="172" height="118" rx="12" fill="#1d1536"/>
+  <rect x="180" y="300" width="152" height="98" rx="6" fill="#33d6c4"/>
+  <!-- sonrisa de marioneta en la pantalla -->
+  <g fill="#1d1536">
+    <circle cx="232" cy="336" r="8"/>
+    <circle cx="280" cy="336" r="8"/>
+  </g>
+  <path d="M228 362 Q256 384 284 362" fill="none" stroke="#1d1536" stroke-width="7" stroke-linecap="round"/>
+  <!-- cruceta direccional y botones -->
+  <g fill="#4a4458">
+    <rect x="114" y="336" width="34" height="12" rx="3"/>
+    <rect x="125" y="325" width="12" height="34" rx="3"/>
+    <circle cx="131" cy="298" r="14"/>
+    <circle cx="381" cy="298" r="14"/>
+  </g>
+  <g>
+    <circle cx="381" cy="336" r="7" fill="#e5484d"/>
+    <circle cx="395" cy="350" r="7" fill="#f6b54a"/>
+    <circle cx="367" cy="350" r="7" fill="#3e8ef7"/>
+    <circle cx="381" cy="364" r="7" fill="#30a46c"/>
+  </g>
+</svg>
