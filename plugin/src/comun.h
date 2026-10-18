@@ -5,7 +5,7 @@
  */
 #include <cstdint>
 
-#define TITIRITERO_VERSION "0.6.0"
+#define TITIRITERO_VERSION "0.6.1"
 #define TITIRITERO_PUERTO  8590
 #define CARPETA_SD         "fs:/vol/external01/wiiu/titiritero"
 #define RUTA_CLAVE         CARPETA_SD "/clave.txt"

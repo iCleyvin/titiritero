@@ -44,7 +44,7 @@ namespace {
     };
     enum { P_VER, P_MANDOS, P_ABRIR, P_ENERGIA, P_AVISOS };
 
-    uint32_t archivos = ARCHIVOS_TODO;
+    uint32_t archivos = ARCHIVOS_LEER;   /* subir archivos deja instalar plugins: lo activa el dueño */
     uint32_t fps = 15;
     constexpr uint32_t COMBO_DEFECTO = WUPS_BUTTON_COMBO_BUTTON_L | WUPS_BUTTON_COMBO_BUTTON_R | WUPS_BUTTON_COMBO_BUTTON_MINUS;
     uint32_t combo = COMBO_DEFECTO;
@@ -213,7 +213,7 @@ namespace {
         static const WUPSConfigItemMultipleValues::ValuePair OPC_EN[] = {
                 {ARCHIVOS_NO, "No"}, {ARCHIVOS_LEER, "View and download only"}, {ARCHIVOS_TODO, "View, upload and delete"}};
         cat.add(WUPSConfigItemMultipleValues::CreateFromValue("archivos", tr("Archivos de la tarjeta SD", "SD card files"),
-                                                              ARCHIVOS_TODO, archivos, idioma_es() ? OPC_ES : OPC_EN,
+                                                              ARCHIVOS_LEER, archivos, idioma_es() ? OPC_ES : OPC_EN,
                                                               al_cambiar_lista));
         raiz.add(std::move(cat));
     }
@@ -265,7 +265,7 @@ void ajustes_iniciar() {
     cargar(servidor);
     cargar(avisar);
     for (auto &p : permisos) cargar(p);
-    WUPSStorageAPI::GetOrStoreDefault<uint32_t>("archivos", archivos, ARCHIVOS_TODO);
+    WUPSStorageAPI::GetOrStoreDefault<uint32_t>("archivos", archivos, ARCHIVOS_LEER);
     WUPSStorageAPI::GetOrStoreDefault<uint32_t>("fps", fps, 15);
     WUPSStorageAPI::GetOrStoreDefault<uint32_t>("combo", combo, COMBO_DEFECTO);
     if (!combo) combo = COMBO_DEFECTO;

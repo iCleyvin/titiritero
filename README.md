@@ -93,7 +93,9 @@ En el menú de plugins (**L + ↓ + −** → **Titiritero**) decides qué se pu
 - **Pausar el control remoto**: corta todo al momento. También con **L + R + −** sin abrir el menú.
 - **Avisos**: que salga un mensaje en la consola cuando alguien se conecta.
 - **Imágenes por segundo**: más fluido en el móvil o menos carga para la consola mientras juegas.
-- **Permisos**: puedes apagar por separado ver la pantalla, pulsar botones, abrir juegos, apagar la consola, mensajes, ver archivos y borrar o subir archivos.
+- **Permisos**: puedes apagar por separado ver la pantalla, pulsar botones, abrir juegos, apagar la consola, mensajes y archivos.
+  Los archivos empiezan en **«Solo ver y descargar»**. Para subir y borrar desde el móvil, cámbialo a «Ver, subir y borrar»
+  (ojo: con eso un móvil conectado podría instalar plugins, que es tanto como manejarlo todo).
 - **Móviles conectados**: la lista de móviles con permiso. Para quitar uno, ponlo en **Quitar** y cierra el menú.
 
 ## ¿Es seguro?

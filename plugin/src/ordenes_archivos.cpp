@@ -41,6 +41,11 @@ namespace {
             const char *fin = strchrnul(c, '/');
             uint32_t largo = (uint32_t) (fin - c);
             if (largo == 2 && c[0] == '.' && c[1] == '.') return false;
+            /* FAT ignora puntos y espacios al final ("titiritero." es "titiritero"): fuera, para que no esquiven
+             * las comprobaciones por nombre. Tampoco caracteres de control. */
+            if (largo > 1 && (c[largo - 1] == '.' || c[largo - 1] == ' ')) return false;
+            for (uint32_t i = 0; i < largo; ++i)
+                if ((unsigned char) c[i] < 0x20) return false;
             if (largo && !(largo == 1 && c[0] == '.')) {
                 if (n + largo + 2 > cap) return false;
                 if (n) dst[n++] = '/';
@@ -56,7 +61,7 @@ namespace {
     /* Secretos que no salen ni se tocan por HTTP: la clave del servidor y los ajustes del plugin, donde Aroma
      * guarda las claves de los móviles emparejados. Quien los tuviera seguiría entrando aunque lo quitaran. */
     bool protegida(const char *r) {
-        if (!strncasecmp(r, "wiiu/titiritero/clave", 21)) return true;
+        if (!strncasecmp(r, "wiiu/titiritero", 15) && (!r[15] || r[15] == '/')) return true;   /* clave y permitidos.txt */
         if (strncasecmp(r, "wiiu/environments/", 18)) return false;
         const char *resto = strchr(r + 18, '/');
         return resto && !strncasecmp(resto, "/plugins/config/titiritero", 26);
